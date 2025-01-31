@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+exclude = ["srcomapi.test_data"]
+
+[project]
+name = "srcomapi"
+dynamic = ["version"]
+description="A Python 3 implementation of the speedrun.com REST API"
+readme = "README.md"
+license = "MIT"
+requires-python=">=3.0"
+dependencies = ["requests"]
+authors = [{name = "blha303", email = "alyssa.dev.smith+srcomapi@gmail.com"}]
+maintainers = [{name = "Corsaka", email = "xpktyt+srcomapi@gmail.com"}]
+classifiers=[
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 3 - Alpha"
+] #5 - Production/Stable
+
+[project.urls]
+Repository = "https://github.com/corsaka/srcomapi"
+"Bug tracker" = "https://github.com/corsaka/srcomapi/issues"
+
+[tool.setuptools.dynamic]
+version = {attr = "srcomapi.__version__"}

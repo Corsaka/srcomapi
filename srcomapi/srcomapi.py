@@ -1,7 +1,6 @@
 import requests
 from http.client import responses
 from os.path import dirname
-from os import environ
 import inspect
 
 import srcomapi
@@ -18,7 +17,7 @@ API_URL = "https://www.speedrun.com/api/v1/"
 TEST_DATA = dirname(srcomapi.__file__) + "/test_data/"
 
 class SpeedrunCom(object):
-    def __init__(self, api_key=None, user_agent="blha303:srcomapi/"+__version__, mock=False):
+    def __init__(self, api_key=None, user_agent="corsaka:srcomapi/"+__version__, mock=False):
         self._datatypes = {v.endpoint:v for k,v in inspect.getmembers(datatypes, inspect.isclass) if hasattr(v, "endpoint")}
         self.api_key = api_key
         self.user_agent = user_agent
@@ -51,7 +50,7 @@ class SpeedrunCom(object):
                             response_size = response.json()['pagination']['size']
                             response_max_size = response.json()['pagination']['max']
                             while response_size == response_max_size: #if request size is the maximum allowed we haven't reached the end of entries
-                                uri = response.json()['pagination']['links'][0]["uri"] #SRC gives us the link to use for next request
+                                uri = response.json()['pagination']['links'][-1]["uri"] #SRC gives us the link to use for next request
                                 response = requests.get(uri)
                                 response_size = response.json()['pagination']['size']
                                 response_max_size = response.json()['pagination']['max']
@@ -71,7 +70,7 @@ class SpeedrunCom(object):
                 response_size = response.json()['pagination']['size']
                 response_max_size = response.json()['pagination']['max']
                 while response_size == response_max_size: 
-                    uri = response.json()['pagination']['links'][0]["uri"] 
+                    uri = response.json()['pagination']['links'][-1]["uri"] 
                     response = requests.get(uri)
                     response_size = response.json()['pagination']['size']
                     response_max_size = response.json()['pagination']['max']

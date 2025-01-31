@@ -1,9 +1,7 @@
-**Inactive. Check [the network graph](https://github.com/blha303/srcomapi/network) to see if there are any active forks. Thanks for using srcomapi.**
-
-srcomapi (SpeedrunComAPI) ![travis-ci](https://travis-ci.org/blha303/srcomapi.svg?branch=master)
+srcomapi (SpeedrunComAPI) ![travis-ci](https://travis-ci.org/corsaka/srcomapi.svg?branch=master)
 =========================
 
-A Python 3 implementation of the speedrun.com REST API. `pip3 install srcomapi`
+A Python 3 implementation of the speedrun.com REST API. `pip install srcomapi`
 
 Does not support Python 2. Sorry.
 
