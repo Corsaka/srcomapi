@@ -40,7 +40,7 @@ class SpeedrunCom(object):
                 response = requests.get(uri, **kwargs)
                 if response.status_code != 404:
                     with gzip.open(TEST_DATA + mock_endpoint + ".json.gz", "wb") as f:
-                        """SRC allows to 200 entries max per request 
+                        """SRC allows up to 200 entries max per request 
                         so we're making requests until we get all entries
                         https://github.com/speedruncomorg/api/blob/master/version1/pagination.md
                         """
