@@ -18,31 +18,20 @@ API_URL = "https://www.speedrun.com/api/v1/"
 TEST_DATA = dirname(srcomapi.__file__) + "/test_data/"
 
 class SpeedrunCom(object):
-    """The class of the API connection.
+    """The class of the API connection."""
 
-    Instantiate with `SpeedrunCom(api_key,user_agent,mock,debug)`.
-    None are required - default values are listed as part of members below.
-
-    Members:
-     api_key: str = None
-      A user's API key obtained from `https://www.speedrun.com/api/auth`.
-     user_agent: str = "corsaka:srcomapi/<version>"
-      The User Agent reported to the website. SRCom recommends the format `name/version`, e.g `my-bot/4.2`.
-     mock: bool = False
-      Whether to use test_data (True) or to query the actual API (False).
-     debug: int = 0
-      If >=1, prints target URI when getting information from the website.
-      If >=2, prints the attribute's name whenever accessing one.
-
-    Functions:
-     get(endpoint, **kwargs) -> data: Query an endpoint of the API with custom data.
-     search(datatype:DataType, params:dict[str,Any]) -> data: Readable version of get, by datatype.
-     get_game(id:str) -> data: Quick form of get for games, by SRCom ID.
-     get_user(id:str) -> data: Quick form of get for users, by SRCom ID.
-     get_series(id:str) -> data: Quick form of get for series, by SRCom ID.
-     get_run(id:str) -> data: Quick form of get for runs, by SRCom ID.
-    """
     def __init__(self, api_key=None, user_agent="corsaka:srcomapi/"+__version__, mock=False, debug=0):
+        """Initialise the SpeedrunCom object.
+
+        :param api_key: A user's API key obtained from https://www.speedrun.com/api/auth. Defaults to None
+        :type api_key: str, optional
+        :param user_agent: The User Agent reported to the website. SRCom recommends the format `name/version`, e.g `my-bot/4.2`. Defaults to `"corsaka:srcomapi/"+__version__`
+        :type user_agent: str, optional
+        :param mock: Whether to use test_data (True) or to query the actual API (False). Defaults to False
+        :type mock: bool, optional
+        :param debug: If >=1, prints target URI when performing API requests. If >=2, prints the attribute's name whenever accessing one. Defaults to 0
+        :type debug: int, optional
+        """
         self._datatypes = {v.endpoint:v for _,v in inspect.getmembers(DataType, inspect.isclass) if hasattr(v, "endpoint")}
         self.api_key = api_key
         self.user_agent = user_agent
@@ -53,6 +42,8 @@ class SpeedrunCom(object):
         """Request data from a specific endpoint of the API.
         
         :param endpoint: The targeted endpoint.
+        :type endpoint: str
+        :raises APIRequestException: If the website returns a 4xx error.
         :param **kwargs: Optional arguments for the GET HTTP request.
         :return: JSON response data from the API.
         :rtype: dict"""
@@ -111,6 +102,17 @@ class SpeedrunCom(object):
         return data
 
     def post(self, endpoint, data, **kwargs):
+        """Submit data to a specific endpoint of the API.
+
+        :param endpoint: The targeted endpoint.
+        :type endpoint: str
+        :param data: JSON data to POST to the API.
+        :type data: dict
+        :raises APIAuthenticationRequired: If no `api_key` is set.
+        :raises APIRequestException: If the website returns a 4xx error.
+        :return: JSON response data from the API.
+        :rtype: dict
+        """
         if self.mock: print("does nothing"); return #TODO: implement
         if not self.api_key:
             raise APIAuthenticationRequired()
@@ -129,6 +131,17 @@ class SpeedrunCom(object):
         return response.json()["data"]
 
     def put(self, endpoint, data, **kwargs):
+        """Update data on a specific endpoint of the API.
+
+        :param endpoint: The targeted endpoint.
+        :type endpoint: str
+        :param data: JSON data to PUT on the API.
+        :type data: dict
+        :raises APIAuthenticationRequired: If no `api_key` is set.
+        :raises APIRequestException: If the website returns a 4xx error.
+        :return: JSON response data from the API.
+        :rtype: dict
+        """
         if self.mock: print("does nothing"); return #TODO: implement
         if not self.api_key:
             raise APIAuthenticationRequired()
@@ -146,14 +159,23 @@ class SpeedrunCom(object):
         
         return response.json()["data"]
 
-    def delete(self, endpoint, data, **kwargs):
+    def delete(self, endpoint, **kwargs):
+        """Delete data from a specific endpoint of the API.
+
+        :param endpoint: The targeted endpoint.
+        :type endpoint: str
+        :raises APIAuthenticationRequired: If no `api_key` is set.
+        :raises APIRequestException: If the website returns a 4xx error.
+        :return: JSON response data from the API.
+        :rtype: dict
+        """
         if self.mock: print("does nothing"); return #TODO: implement
         if not self.api_key:
             raise APIAuthenticationRequired()
         kwargs.update({"headers": {"User-Agent":self.user_agent, "X-API-Key":self.api_key}})
         uri = API_URL + endpoint
         if self.debug >= 1: print("DELETE "+uri)
-        response = requests.delete(uri, json=data, **kwargs)
+        response = requests.delete(uri, **kwargs)
         if response.status_code == 400:
             print(response.json()["message"])
             for error in response.json()["errors"]:
@@ -206,6 +228,7 @@ class SpeedrunCom(object):
         
         :param datatype: `DataType` object to search.
         :param params: Parameters to search with.
+        :type params: dict
         :return: JSON response data from the website.
         :rtype: dict"""
         response = self.get(datatype.endpoint, params=params)
@@ -218,17 +241,32 @@ class SpeedrunCom(object):
 
         :param category: The category ID to submit to.
         :param platform: The platform ID used in the run.
-        :param times: A `dict[str,float]` or `dict[str,int]` of recorded times for the run.
-        :param level: (optional) The level ID to submit to (if the category is per-level).
-        :param date: (optional) The date the run was performed, in YYYY-MM-DD format. Defaults to today.
-        :param region: (optional) The region ID of the game.
-        :param players: (optional) A `list[dict[str,str]]` or `list[User]` of players in the run. Defaults to the API key's user.
-        :param video: (optional) The video link.
-        :param comment: (optional) The description of the run. Up to 2000 characters.
-        :param splitsio: (optional) The run's splitsio ID.
-        :param variables: (optional) A `dict[str,dict[str,str]]` of variables associated with the run. Complex formatting - look at API reference.
-        :param verified: (optional) Whether the run is verified with submission. Requires a moderator's API key if `True`. Defaults to `False`.
-        :param emulated: (optional) Whether the run is emulated or not. Defaults to `False`.
+        :param times: The recorded times for the run.
+        :param level: The level ID to submit to (if the category is per-level).
+        :param date: The date the run was performed, in YYYY-MM-DD format. Defaults to today.
+        :param region: The region ID of the game.
+        :param players: The of players in the run. Defaults to the API key's user.
+        :param video: The video link.
+        :param comment: The description of the run. Up to 2000 characters.
+        :param splitsio: The run's splitsio ID.
+        :param variables: The variables associated with the run. Complex formatting - see API reference.
+        :param verified: Whether the run is verified with submission. Requires a moderator's API key if `True`. Defaults to `False`.
+        :param emulated: Whether the run is emulated or not. Defaults to `False`.
+        :type category: str
+        :type platform: str
+        :type times: dict[str,float] or dict[str,int]
+        :type level: str, optional
+        :type date: str, optional
+        :type region: str, optional
+        :type players: list[dict[str,str]] or list[User], optional
+        :type video: str, optional
+        :type comment: str, optional
+        :type splitsio: str, optional
+        :type variables: dict[str,dict[str,str]], optional
+        :type verified: bool, optional
+        :type emulated: bool, optional
+        :raises AttributeError: If any attribute is set incorrectly.
+        :raises AssertionError: If any attributes have the wrong type.
         :return: A `Run` object of the submitted run.
         :rtype: srcomapi.DataType.Run"""
 
