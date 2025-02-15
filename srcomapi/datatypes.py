@@ -7,7 +7,7 @@ class DataType(object):
         global _cache
         if self.__class__.__name__ == "Moderator":
             self.position = position
-        self._retrieved = []
+        self._retrieved = [] #per-object caching
         self._repr = _repr
         self._api = srcom
         if not self._api:
@@ -54,11 +54,11 @@ class DataType(object):
 
     def __repr__(self):
         if hasattr(self, "name"):
-            repr_str = '''"{}"'''.format(self.name)
+            repr_str = '"{}"'.format(self.name)
         elif "id" in self.data:
             repr_str = self.data["id"]
         else:
-            return """<{}>""".format(self.__class__.__name__)
+            return "<{}>".format(self.__class__.__name__)
         if self._repr:
             return repr_str
         return "<{} {}>".format(self.__class__.__name__, repr_str)
@@ -205,7 +205,7 @@ class Leaderboard(DataType):
             self.data["game"] = Game(self._api, id=self.data["game"], _repr=True)
         if not isinstance(self.data["category"], Category):
             self.data["category"] = Category(self._api, id=self.data["category"], _repr=True)
-        return """<Leaderboard {game}/{category}>""".format(**self.data)
+        return "<Leaderboard {game}/{category}>".format(**self.data)
 
 class Level(DataType):
     endpoint = "levels"
@@ -275,6 +275,14 @@ class Run(DataType):
         self.data["players"] = p
         self._retrieved.append('players')
         return p
+
+    @property
+    def level(self):
+        return Level(self._api, data=self.data["level"]["data"])
+    
+    @property
+    def category(self):
+        return Category(self._api, data=self.data["category"]["data"])
 
     @property
     def embeds(self):

@@ -3,10 +3,12 @@ srcomapi (SpeedrunComAPI) ![travis-ci](https://travis-ci.org/corsaka/srcomapi.sv
 
 A Python 3 implementation of the speedrun.com REST API. `pip install srcomapi`
 
-Does not support Python 2. Sorry.
+Does not support Python 2. It's been half a decade since 2.7 hit EOL. C'mon.
 
 Usage
 =====
+
+Documentation of the API itself is available at [speedruncomorg/api](https://github.com/speedruncomorg/api/)
 
 Start
 -----
