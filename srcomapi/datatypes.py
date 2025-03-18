@@ -32,12 +32,10 @@ class DataType(object):
                 if endpoint not in self.data:
                     if endpoint == "categories": endpoint = "category"
                     else: endpoint = endpoint[:-1]
-
-                    if endpoint not in self.data:
-                        continue
-
+                    if endpoint not in self.data: continue
+                if type(self.data[endpoint]) == str or self.data[endpoint]["data"] == []: continue
                 if self.data[endpoint] is not None and "data" in self.data[endpoint]:
-                    self.data[endpoint] = embed(self,data=self.data[endpoint]["data"])
+                    self.data[endpoint] = embed(self._api,data=self.data[endpoint]["data"])
         if not self.__class__.__name__ in _cache:
             _cache[self.__class__.__name__] = {}
         _cache[self.__class__.__name__][self.data["id"] if "id" in self.data else repr(self)] = self.data
@@ -281,14 +279,6 @@ class Run(DataType):
         self.data["players"] = p
         self._retrieved.append('players')
         return p
-
-    @property
-    def level(self):
-        return Level(self._api, data=self.data["level"]["data"])
-    
-    @property
-    def category(self):
-        return Category(self._api, data=self.data["category"]["data"])
 
     @property
     def embeds(self):
