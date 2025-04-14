@@ -13,8 +13,10 @@ class DataType(object):
         if not self._api:
             raise APINotProvidedException("A SpeedrunCom instance was not passed to the DataType")
         if type(id) is dict:
-            if "data" in id: self.data = id["data"] #if it's accidentally added another layer (fuck you, src)
-            else: self.data = id
+            if "data" in id: #if it's accidentally added another layer (fuck you, src)
+                self.data = id["data"]
+            else:
+                self.data = id
         elif _cache.get(self.__class__.__name__, {}).get(id, None):
             self.data = _cache[self.__class__.__name__][id]
         elif id and not data:
@@ -22,19 +24,28 @@ class DataType(object):
         elif data:
             if issubclass(type(data),DataType):
                 raise TypeError("Trying to create a DataType using data from an already existing DataType!")
-            if "data" in data: self.data = data["data"]
-            else: self.data = data
+            if "data" in data:
+                self.data = data["data"]
+            else:
+                self.data = data
         if self.data:
             for embed in self.embeds:
                 if not hasattr(embed, "endpoint"):
                     continue
                 endpoint = embed.endpoint
-                if endpoint not in self.data:
-                    if endpoint == "categories": endpoint = "category"
-                    else: endpoint = endpoint[:-1]
-                    if endpoint not in self.data: continue
-                if type(self.data[endpoint]) == str or self.data[endpoint]["data"] == []: continue
+                if endpoint not in self.data: #sometimes the endpoints are plural. sometimes they aren't.
+                    if endpoint == "categories":
+                        endpoint = "category"
+                    else:
+                        endpoint = endpoint[:-1]
+                    if endpoint not in self.data:
+                        continue
+                if type(self.data[endpoint]) == str: #for unembedded endpoints
+                    continue
+
                 if self.data[endpoint] is not None and "data" in self.data[endpoint]:
+                    if self.data[endpoint]["data"] == []:
+                        continue
                     self.data[endpoint] = embed(self._api,data=self.data[endpoint]["data"])
         if not self.__class__.__name__ in _cache:
             _cache[self.__class__.__name__] = {}

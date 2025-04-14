@@ -59,6 +59,8 @@ class SpeedrunCom(object):
                 with gzip.open(TEST_DATA + mock_endpoint + ".json.gz") as f:
                     data = json.loads(f.read().decode("utf-8"))["data"]
             except FileNotFoundError:
+                print("Trying to find {} and failing!".format(mock_endpoint))
+                return
                 response = requests.get(uri, **kwargs)
                 if response.status_code != 404:
                     with gzip.open(TEST_DATA + mock_endpoint + ".json.gz", "wb") as f:
